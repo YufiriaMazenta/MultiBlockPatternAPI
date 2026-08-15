@@ -1,0 +1,40 @@
+# MultiBlockPatternAPI 消息配置
+
+# 消息前缀
+prefix: "&7[&eMBP&7] "
+
+# 没有模式时显示的消息
+no_patterns: "&7没有注册的模式。"
+
+# 模式列表标题
+pattern_list_header: "&6已注册的模式:"
+
+# 模式列表条目，支持 %id% 和 %name% 占位符
+pattern_list_entry: "  &e%id% &7- %name%"
+
+# 非玩家执行命令时显示的消息
+only_player: "&c此命令只能由玩家执行。"
+
+# 没有匹配模式时显示的消息
+no_match: "&7当前位置没有匹配的模式。"
+
+# 检测到模式时显示的消息，支持 %name% 占位符
+match_found: "&a检测到模式: &e%name%"
+
+# 检测完成后的汇总消息，支持 %count% 占位符
+match_summary: "&a共检测到 &e%count% &a个匹配的模式。"
+
+# 插件启用时显示的消息
+plugin_enabled: "&aMultiBlockPatternAPI 已启用。"
+
+# 插件禁用时显示的消息
+plugin_disabled: "&cMultiBlockPatternAPI 已禁用。"
+
+# 模式加载成功时显示的消息，支持 %name% 占位符
+pattern_loaded: "&a已加载模式: %name%"
+
+# 模式加载失败时显示的消息，支持 %name% 和 %error% 占位符
+pattern_load_error: "&c加载模式 '%name%' 失败: %error%"
+
+# 重新加载配置成功时显示的消息
+reload_success: "&a配置已重新加载。"

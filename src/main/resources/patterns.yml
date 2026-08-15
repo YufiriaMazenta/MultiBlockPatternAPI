@@ -1,0 +1,115 @@
+simple_altar:
+  display_name: "简易祭坛"
+  rotation: true
+
+  layer:
+    - "L L"
+    - " B "
+    - "L L"
+
+  map:
+    L: OAK_LOG
+    B: BEACON
+
+  actions:
+    - type: destroy
+      drop_items: true
+
+iron_golem:
+  display_name: "铁傀儡"
+  rotation: false
+
+  layer:
+    - " P "
+    - "IBI"
+    - " I "
+
+  map:
+    I: IRON_BLOCK
+    B: CARVED_PUMPKIN
+    P: JACK_O_LANTERN
+
+  trigger: P
+
+  actions:
+    - type: destroy
+      drop_items: false
+    - type: message
+      text: "&a铁傀儡已生成!"
+
+wither:
+  display_name: "凋零"
+  rotation: false
+
+  layer:
+    - "S S"
+    - "SBS"
+    - " B "
+    - " B "
+
+  map:
+    B: SOUL_SAND
+    S: WITHER_SKELETON_SKULL
+
+  trigger: S
+
+  actions:
+    - type: destroy
+      drop_items: false
+    - type: message
+      text: "&a凋零已生成!"
+
+nether_portal:
+  display_name: "下界传送门"
+  rotation: true
+  direction: vertical
+
+  layer:
+    - "OOOOO"
+    - "O___O"
+    - "O___O"
+    - "O___O"
+    - "OOOOO"
+
+  map:
+    O: OBSIDIAN
+    _: AIR
+
+  actions:
+    - type: destroy
+      drop_items: true
+    - type: message
+      text: "&a下界传送门已匹配!"
+
+treasure_room:
+  display_name: "宝藏房间"
+  rotation: false
+
+  layers:
+    -  # Layer 0
+      - "SSSSS"
+      - "S___S"
+      - "S___S"
+      - "S___S"
+      - "SSSSS"
+    -  # Layer 1
+      - "S___S"
+      - "_____"
+      - "_____"
+      - "_____"
+      - "S___S"
+    -  # Layer 2
+      - "SSSSS"
+      - "S___S"
+      - "S_C_S"
+      - "S___S"
+      - "SSSSS"
+
+  map:
+    S: STONE_BRICKS
+    _: AIR
+    C: CHEST
+
+  actions:
+    - type: destroy
+      drop_items: true
