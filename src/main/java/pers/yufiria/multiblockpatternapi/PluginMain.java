@@ -2,24 +2,35 @@ package pers.yufiria.multiblockpatternapi;
 
 import crypticlib.BukkitPlugin;
 import crypticlib.CrypticLib;
-import crypticlib.config.BukkitConfigWrapper;
-import pers.yufiria.multiblockpatternapi.config.Messages;
-import pers.yufiria.multiblockpatternapi.registry.PatternRegistryImpl;
+import pers.yufiria.multiblockpatternapi.config.Languages;
+import pers.yufiria.multiblockpatternapi.config.PluginConfigs;
 
 public final class PluginMain extends BukkitPlugin {
 
+    private static PluginMain instance;
+
+    public PluginMain() {
+        instance = this;
+    }
+
     @Override
     public void whenEnable() {
-        CrypticLib.debug = true;
-        BukkitConfigWrapper patternsWrapper = getConfigWrapperOrCreate("patterns.yml");
-        PatternRegistryImpl.getInstance().setPatternsWrapper(patternsWrapper);
-        PatternRegistryImpl.getInstance().loadPatterns();
-
-        CrypticLib.info(Messages.PLUGIN_ENABLED.value());
+        CrypticLib.debug = PluginConfigs.DEBUG.value();
+        CrypticLib.info(Languages.LOG_PLUGIN_ENABLED.value());
     }
 
     @Override
     public void whenDisable() {
-        CrypticLib.info(Messages.PLUGIN_DISABLED.value());
+        CrypticLib.info(Languages.LOG_PLUGIN_DISABLED.value());
     }
+
+    @Override
+    public void whenReload() {
+        CrypticLib.debug = PluginConfigs.DEBUG.value();
+    }
+
+    public static PluginMain instance() {
+        return instance;
+    }
+
 }

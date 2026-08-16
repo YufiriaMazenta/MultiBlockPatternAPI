@@ -3,19 +3,19 @@ package pers.yufiria.multiblockpatternapi.impl;
 import pers.yufiria.multiblockpatternapi.api.RotationSupport;
 import pers.yufiria.multiblockpatternapi.util.BlockVector;
 
-public class RotationSupportImpl implements RotationSupport {
+public class SimpleRotationSupport implements RotationSupport {
 
-    private static final RotationSupportImpl INSTANCE = new RotationSupportImpl();
+    private static final SimpleRotationSupport INSTANCE = new SimpleRotationSupport();
 
-    public static RotationSupportImpl getInstance() {
+    public static SimpleRotationSupport getInstance() {
         return INSTANCE;
     }
 
     @Override
     public BlockVector applyTransform(BlockVector vector, Rotation rotation, Mirror mirror) {
-        int x = vector.getX();
-        int y = vector.getY();
-        int z = vector.getZ();
+        int x = vector.x();
+        int y = vector.y();
+        int z = vector.z();
 
         // Apply rotation (on XZ plane, Y unchanged)
         switch (rotation) {

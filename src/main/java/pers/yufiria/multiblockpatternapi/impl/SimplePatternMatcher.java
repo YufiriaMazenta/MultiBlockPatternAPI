@@ -1,35 +1,24 @@
 package pers.yufiria.multiblockpatternapi.impl;
 
+import crypticlib.CrypticLib;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.util.BoundingBox;
-import pers.yufiria.multiblockpatternapi.api.MatchResult;
-import pers.yufiria.multiblockpatternapi.api.MultiBlockPattern;
-import pers.yufiria.multiblockpatternapi.api.PatternMatcher;
-import pers.yufiria.multiblockpatternapi.api.RotationSupport;
+import pers.yufiria.multiblockpatternapi.api.*;
 import pers.yufiria.multiblockpatternapi.util.BlockVector;
-
-import crypticlib.CrypticLib;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
 
-public class PatternMatcherImpl implements PatternMatcher {
+public enum SimplePatternMatcher implements PatternMatcher {
 
-    private static final PatternMatcherImpl INSTANCE = new PatternMatcherImpl();
+    INSTANCE;
+
     private final Map<String, MultiBlockPattern> patterns = new ConcurrentHashMap<>();
-    private final RotationSupportImpl rotationSupport = RotationSupportImpl.getInstance();
-
-    private PatternMatcherImpl() {}
-
-    public static PatternMatcherImpl getInstance() {
-        return INSTANCE;
-    }
+    private RotationSupport rotationSupport = SimpleRotationSupport.getInstance();
 
     @Override
     public MatchResult match(MultiBlockPattern pattern, Location origin) {
@@ -39,12 +28,12 @@ public class PatternMatcherImpl implements PatternMatcher {
     @Override
     public MatchResult match(MultiBlockPattern pattern, Location origin, RotationSupport.Rotation rotation, RotationSupport.Mirror mirror) {
         Map<BlockVector, Character> offsetCharMap = pattern.getOffsetCharMap();
-        Map<Character, Object> charMap = pattern.getCharMap();
+        Map<Character, BlockMatcher> charMatcherMap = pattern.getCharMatcherMap();
         List<Block> matchedBlocks = new ArrayList<>(offsetCharMap.size());
 
         World world = origin.getWorld();
         if (world == null) {
-            return new MatchResultImpl(false, pattern, origin, rotation, List.of());
+            return new SimpleMatchResult(false, pattern, origin, rotation, List.of(), null, null);
         }
 
         int baseX = origin.getBlockX();
@@ -60,50 +49,35 @@ public class PatternMatcherImpl implements PatternMatcher {
 
             BlockVector transformed = rotationSupport.applyTransform(offset, rotation, mirror);
 
-            int blockX = baseX + transformed.getX();
-            int blockY = baseY + transformed.getY();
-            int blockZ = baseZ + transformed.getZ();
+            int blockX = baseX + transformed.x();
+            int blockY = baseY + transformed.y();
+            int blockZ = baseZ + transformed.z();
 
             if (blockY < 0 || blockY > world.getMaxHeight()) {
                 CrypticLib.debug("[MBP] Block Y out of bounds: " + blockY);
-                return new MatchResultImpl(false, pattern, origin, rotation, List.of());
+                return new SimpleMatchResult(false, pattern, origin, rotation, List.of(), null, null);
             }
 
             Block block = world.getBlockAt(blockX, blockY, blockZ);
 
-            // 获取该字符对应的匹配对象
-            Object expected = charMap.get(expectedChar);
+            BlockMatcher matcher = charMatcherMap.get(expectedChar);
 
-            CrypticLib.debug("[MBP] Checking offset " + offset.toString() + " char '" + expectedChar + "' at " + blockX + "," + blockY + "," + blockZ + " block: " + block.getType() + " expected: " + expected);
+            CrypticLib.debug("[MBP] Checking offset " + offset + " char '" + expectedChar + "' at " + blockX + "," + blockY + "," + blockZ + " block: " + block.getType() + " matcher: " + (matcher != null ? matcher.toString() : "wildcard"));
 
-            // null 表示通配符，匹配任意方块
-            if (expected == null) {
-                matchedBlocks.add(block);
+            if (matcher == null) {
                 continue;
             }
 
-            // 检查方块是否匹配
-            if (!matchesBlock(block, expected)) {
+            if (!matcher.matches(block)) {
                 CrypticLib.debug("[MBP] Block mismatch!");
-                return new MatchResultImpl(false, pattern, origin, rotation, List.of());
+                return new SimpleMatchResult(false, pattern, origin, rotation, List.of(), null, null);
             }
 
             matchedBlocks.add(block);
         }
 
         CrypticLib.debug("[MBP] Pattern matched successfully!");
-        return new MatchResultImpl(true, pattern, origin, rotation, matchedBlocks);
-    }
-
-    private boolean matchesBlock(Block block, Object expected) {
-        if (expected instanceof Material material) {
-            return block.getType() == material;
-        } else if (expected instanceof Predicate<?> predicate) {
-            @SuppressWarnings("unchecked")
-            Predicate<Block> blockPredicate = (Predicate<Block>) predicate;
-            return blockPredicate.test(block);
-        }
-        return false;
+        return new SimpleMatchResult(true, pattern, origin, rotation, matchedBlocks, null, null);
     }
 
     @Override
@@ -152,7 +126,16 @@ public class PatternMatcherImpl implements PatternMatcher {
         return patterns.get(patternId);
     }
 
+    @Override
     public Map<String, MultiBlockPattern> getAllPatterns() {
         return Map.copyOf(patterns);
+    }
+
+    public RotationSupport rotationSupport() {
+        return rotationSupport;
+    }
+
+    public void setRotationSupport(RotationSupport rotationSupport) {
+        this.rotationSupport = rotationSupport;
     }
 }
