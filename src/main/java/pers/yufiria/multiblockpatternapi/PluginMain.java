@@ -2,8 +2,10 @@ package pers.yufiria.multiblockpatternapi;
 
 import crypticlib.BukkitPlugin;
 import crypticlib.CrypticLib;
+import crypticlib.script.ScriptEngine;
 import pers.yufiria.multiblockpatternapi.config.Languages;
 import pers.yufiria.multiblockpatternapi.config.PluginConfigs;
+import pers.yufiria.multiblockpatternapi.script.ActionModule;
 
 public final class PluginMain extends BukkitPlugin {
 
@@ -16,6 +18,7 @@ public final class PluginMain extends BukkitPlugin {
     @Override
     public void whenEnable() {
         CrypticLib.debug = PluginConfigs.DEBUG.value();
+        ScriptEngine.INSTANCE.registerModule(ActionModule.INSTANCE);
         CrypticLib.info(Languages.LOG_PLUGIN_ENABLED.value());
     }
 

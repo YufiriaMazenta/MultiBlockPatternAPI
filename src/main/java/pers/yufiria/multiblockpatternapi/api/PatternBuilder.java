@@ -187,11 +187,8 @@ public class PatternBuilder {
         }
 
         Map<BlockVector, Character> offsetCharMap = new LinkedHashMap<>();
-        Map<Character, BlockMatcher> charMatcherMap = new HashMap<>();
         BlockVector triggerOffset = null;
-
-        charMatcherMap.put('_', BlockMatcher.ofMaterial(Material.AIR));
-        charMatcherMap.putAll(matcherMap);
+        Map<Character, BlockMatcher> charMatcherMap = new HashMap<>(matcherMap);
 
         CrypticLib.debug("[MBP] Building pattern: " + id + " direction: " + direction);
 

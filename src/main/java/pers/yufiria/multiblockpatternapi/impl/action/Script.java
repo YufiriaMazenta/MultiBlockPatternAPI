@@ -39,6 +39,7 @@ public enum Script implements ActionType {
                 context.setVariable("x", ScriptValue.of(origin.getX()));
                 context.setVariable("y", ScriptValue.of(origin.getY()));
                 context.setVariable("z", ScriptValue.of(origin.getZ()));
+                context.setVariable("location", ScriptValue.of(origin.clone(), ReflectPropertyResolver.INSTANCE));
                 context.setVariable("result", ScriptValue.of(result, ReflectPropertyResolver.INSTANCE));
                 compiledScript.execute(context);
             };

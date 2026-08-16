@@ -2,6 +2,7 @@ package pers.yufiria.multiblockpatternapi.impl;
 
 import crypticlib.CrypticLib;
 import crypticlib.util.BukkitConfigHelper;
+import crypticlib.util.MaterialHelper;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +13,7 @@ import pers.yufiria.multiblockpatternapi.api.ActionType;
 import pers.yufiria.multiblockpatternapi.api.PatternConfigParser;
 import pers.yufiria.multiblockpatternapi.api.TriggerType;
 import pers.yufiria.multiblockpatternapi.impl.action.DestroyStructure;
+import pers.yufiria.multiblockpatternapi.impl.action.Script;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,6 +26,7 @@ public enum SimplePatternConfigParser implements PatternConfigParser {
 
     SimplePatternConfigParser() {
         registerActionType(DestroyStructure.INSTANCE);
+        registerActionType(Script.INSTANCE);
     }
 
     @Override
@@ -77,7 +80,7 @@ public enum SimplePatternConfigParser implements PatternConfigParser {
                 char c = cleanKey.charAt(0);
                 String materialName = blocksConfig.getString(key);
                 if (materialName != null) {
-                    Material material = Material.matchMaterial(materialName);
+                    Material material = MaterialHelper.matchMaterial(materialName);
                     if (material != null) {
                         builder.block(c, BlockMatcher.ofMaterial(material));
                     }

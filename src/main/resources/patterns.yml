@@ -17,7 +17,7 @@ simple_altar:
     - type: script
       script:
         - 'tell("&6祭坛激活!")'
-        - ''
+        - 'summon("minecraft:wither")'
 
 iron_golem:
   display_name: "铁傀儡"
@@ -29,17 +29,15 @@ iron_golem:
     - " I "
 
   blocks:
-    I: IRON_BLOCK
-    B: CARVED_PUMPKIN
-    P: JACK_O_LANTERN
+    I: minecraft:iron_block
+    B: minecraft:carved_pumpkin
+    P: minecraft:jack_o_lantern
 
   trigger: P
 
   actions:
     - type: destroy_structure
       drop_items: false
-    - type: message
-      text: "&a铁傀儡已生成!"
 
 wither:
   display_name: "凋零"
@@ -52,16 +50,14 @@ wither:
     - " B "
 
   blocks:
-    B: SOUL_SAND
-    S: WITHER_SKELETON_SKULL
+    B: minecraft:soul_sand
+    S: minecraft:wither_skeleton_skull
 
   trigger: S
 
   actions:
     - type: destroy_structure
       drop_items: false
-    - type: message
-      text: "&a凋零已生成!"
 
 nether_portal:
   display_name: "下界传送门"
@@ -76,14 +72,12 @@ nether_portal:
     - "OOOOO"
 
   blocks:
-    O: OBSIDIAN
-    _: AIR
+    O: minecraft:obsidian
+    _: minecraft:air
 
   actions:
     - type: destroy_structure
       drop_items: true
-    - type: message
-      text: "&a下界传送门已匹配!"
 
 treasure_room:
   display_name: "宝藏房间"
@@ -110,9 +104,9 @@ treasure_room:
       - "SSSSS"
 
   blocks:
-    S: STONE_BRICKS
-    _: AIR
-    C: CHEST
+    S: minecraft:stone_bricks
+    _: minecraft:air
+    C: minecraft:chest
 
   actions:
     - type: destroy_structure
