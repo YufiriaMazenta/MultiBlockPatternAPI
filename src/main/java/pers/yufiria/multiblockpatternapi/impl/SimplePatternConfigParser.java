@@ -1,21 +1,30 @@
 package pers.yufiria.multiblockpatternapi.impl;
 
-import crypticlib.BukkitPlayer;
+import crypticlib.CrypticLib;
 import crypticlib.util.BukkitConfigHelper;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
+import org.jetbrains.annotations.NotNull;
 import pers.yufiria.multiblockpatternapi.api.BlockMatcher;
 import pers.yufiria.multiblockpatternapi.api.MultiBlockPattern;
 import pers.yufiria.multiblockpatternapi.api.PatternBuilder;
+import pers.yufiria.multiblockpatternapi.api.ActionType;
 import pers.yufiria.multiblockpatternapi.api.PatternConfigParser;
 import pers.yufiria.multiblockpatternapi.api.TriggerType;
+import pers.yufiria.multiblockpatternapi.impl.action.DestroyStructure;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class SimplePatternConfigParser implements PatternConfigParser {
+public enum SimplePatternConfigParser implements PatternConfigParser {
+
+    INSTANCE;
+
+    private final Map<String, ActionType> actionTypeMap = new ConcurrentHashMap<>();
+
+    SimplePatternConfigParser() {
+        registerActionType(DestroyStructure.INSTANCE);
+    }
 
     @Override
     public MultiBlockPattern parse(String patternId, ConfigurationSection config) {
@@ -27,7 +36,7 @@ public class SimplePatternConfigParser implements PatternConfigParser {
             : MultiBlockPattern.Direction.HORIZONTAL;
 
         // 解析触发模式
-        String triggerModeStr = config.getString("trigger_mode", "block_change");
+        String triggerModeStr = config.getString("trigger_type", "block_change");
         TriggerType triggerType = "interaction".equalsIgnoreCase(triggerModeStr)
             ? TriggerType.INTERACTION
             : TriggerType.BLOCK_CHANGE;
@@ -60,13 +69,13 @@ public class SimplePatternConfigParser implements PatternConfigParser {
             }
         }
 
-        ConfigurationSection mapSection = config.getConfigurationSection("map");
-        if (mapSection != null) {
-            for (String key : mapSection.getKeys(false)) {
+        ConfigurationSection blocksConfig = config.getConfigurationSection("blocks");
+        if (blocksConfig != null) {
+            for (String key : blocksConfig.getKeys(false)) {
                 String cleanKey = key.replace("\"", "").replace("'", "");
                 if (cleanKey.length() != 1) continue;
                 char c = cleanKey.charAt(0);
-                String materialName = mapSection.getString(key);
+                String materialName = blocksConfig.getString(key);
                 if (materialName != null) {
                     Material material = Material.matchMaterial(materialName);
                     if (material != null) {
@@ -81,8 +90,8 @@ public class SimplePatternConfigParser implements PatternConfigParser {
             String triggerStr = config.getString("trigger", "");
             if (triggerStr.length() == 1) {
                 char triggerChar = triggerStr.charAt(0);
-                if (mapSection != null) {
-                    String materialName = mapSection.getString(triggerStr);
+                if (blocksConfig != null) {
+                    String materialName = blocksConfig.getString(triggerStr);
                     if (materialName != null) {
                         Material triggerMaterial = Material.matchMaterial(materialName);
                         if (triggerMaterial != null) {
@@ -100,26 +109,11 @@ public class SimplePatternConfigParser implements PatternConfigParser {
                 if (actionObj instanceof Map<?, ?> actionMap) {
                     ConfigurationSection actionConfig = BukkitConfigHelper.map2ConfigSection(actionMap);
                     String type = actionConfig.getString("type");
-                    if ("destroy".equals(type)) {
-                        boolean dropItems = actionConfig.getBoolean("drop_items", true);
-                        builder.action(result -> {
-                            for (Block matchedBlock : result.getMatchedBlocks()) {
-                                if (dropItems) {
-                                    matchedBlock.breakNaturally();
-                                } else {
-                                    matchedBlock.setType(Material.AIR);
-                                }
-                            }
-                        });
-                    } else if ("message".equals(type)) {
-                        String text = actionConfig.getString("text", "");
-                        builder.action(result -> {
-                            if (result.getOrigin().getWorld() != null) {
-                                result.getOrigin().getWorld().getPlayers().forEach(player ->
-                                        BukkitPlayer.byPlayer(player).sendMsg(text)
-                                );
-                            }
-                        });
+                    ActionType actionType = actionTypeMap.get(type);
+                    if (actionType != null) {
+                        builder.action(actionType.createAction(actionConfig));
+                    } else {
+                        CrypticLib.info("&cUnknown action type: " + type);
                     }
                 }
             }
@@ -127,4 +121,18 @@ public class SimplePatternConfigParser implements PatternConfigParser {
 
         return builder.build();
     }
+
+    public void registerActionType(@NotNull ActionType actionType) {
+        Objects.requireNonNull(actionType);
+        actionTypeMap.put(actionType.typeId(), actionType);
+    }
+
+    public Optional<ActionType> getRegisteredActionType(String typeId) {
+        return Optional.ofNullable(actionTypeMap.get(typeId));
+    }
+
+    public void clearRegisteredActionTypes() {
+        actionTypeMap.clear();
+    }
+
 }

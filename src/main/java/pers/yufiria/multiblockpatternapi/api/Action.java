@@ -6,12 +6,13 @@ package pers.yufiria.multiblockpatternapi.api;
  * 通过 {@link MultiBlockPattern#getActions()} 注册，在匹配成功时自动执行。
  */
 @FunctionalInterface
-public interface PatternAction {
+public interface Action {
 
     /**
      * 匹配成功时执行
      *
      * @param result 匹配结果
      */
-    void onMatch(MatchResult result);
+    void perform(MatchResult result);
+
 }

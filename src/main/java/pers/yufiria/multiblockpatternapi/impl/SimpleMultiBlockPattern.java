@@ -16,7 +16,7 @@ public class SimpleMultiBlockPattern implements MultiBlockPattern {
     private final String displayName;
     private final Map<BlockVector, Character> offsetCharMap;
     private final Map<Character, BlockMatcher> charMatcherMap;
-    private final List<PatternAction> actions;
+    private final List<Action> actions;
     private final boolean rotationEnabled;
     private final Direction direction;
     private final char triggerChar;
@@ -30,7 +30,7 @@ public class SimpleMultiBlockPattern implements MultiBlockPattern {
         String displayName,
         Map<BlockVector, Character> offsetCharMap,
         Map<Character, BlockMatcher> charMatcherMap,
-        List<PatternAction> actions,
+        List<Action> actions,
         boolean rotationEnabled,
         Direction direction,
         char triggerChar,
@@ -74,7 +74,7 @@ public class SimpleMultiBlockPattern implements MultiBlockPattern {
     }
 
     @Override
-    public List<PatternAction> getActions() {
+    public List<Action> getActions() {
         return actions;
     }
 

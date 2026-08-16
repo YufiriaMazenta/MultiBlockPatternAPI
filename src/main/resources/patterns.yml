@@ -7,13 +7,17 @@ simple_altar:
     - " B "
     - "L L"
 
-  map:
-    L: OAK_LOG
-    B: BEACON
+  blocks:
+    L: minecraft:oak_log
+    B: minecraft:beacon
 
   actions:
-    - type: destroy
+    - type: destroy_structure
       drop_items: true
+    - type: script
+      script:
+        - 'tell("&6祭坛激活!")'
+        - ''
 
 iron_golem:
   display_name: "铁傀儡"
@@ -24,7 +28,7 @@ iron_golem:
     - "IBI"
     - " I "
 
-  map:
+  blocks:
     I: IRON_BLOCK
     B: CARVED_PUMPKIN
     P: JACK_O_LANTERN
@@ -32,7 +36,7 @@ iron_golem:
   trigger: P
 
   actions:
-    - type: destroy
+    - type: destroy_structure
       drop_items: false
     - type: message
       text: "&a铁傀儡已生成!"
@@ -47,14 +51,14 @@ wither:
     - " B "
     - " B "
 
-  map:
+  blocks:
     B: SOUL_SAND
     S: WITHER_SKELETON_SKULL
 
   trigger: S
 
   actions:
-    - type: destroy
+    - type: destroy_structure
       drop_items: false
     - type: message
       text: "&a凋零已生成!"
@@ -71,12 +75,12 @@ nether_portal:
     - "O___O"
     - "OOOOO"
 
-  map:
+  blocks:
     O: OBSIDIAN
     _: AIR
 
   actions:
-    - type: destroy
+    - type: destroy_structure
       drop_items: true
     - type: message
       text: "&a下界传送门已匹配!"
@@ -105,11 +109,11 @@ treasure_room:
       - "S___S"
       - "SSSSS"
 
-  map:
+  blocks:
     S: STONE_BRICKS
     _: AIR
     C: CHEST
 
   actions:
-    - type: destroy
+    - type: destroy_structure
       drop_items: true

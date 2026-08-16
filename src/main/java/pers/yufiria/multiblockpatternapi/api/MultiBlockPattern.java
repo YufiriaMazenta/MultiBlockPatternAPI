@@ -60,7 +60,7 @@ public interface MultiBlockPattern {
      *
      * @return 动作列表
      */
-    List<PatternAction> getActions();
+    List<Action> getActions();
 
     /**
      * 是否启用旋转匹配

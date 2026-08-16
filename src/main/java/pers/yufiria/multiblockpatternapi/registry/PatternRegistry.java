@@ -14,6 +14,7 @@ import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 import pers.yufiria.multiblockpatternapi.api.*;
+import pers.yufiria.multiblockpatternapi.api.PatternConfigParser;
 import pers.yufiria.multiblockpatternapi.config.Languages;
 import pers.yufiria.multiblockpatternapi.impl.SimplePatternConfigParser;
 import pers.yufiria.multiblockpatternapi.impl.SimplePatternMatcher;
@@ -32,7 +33,7 @@ public enum PatternRegistry implements LifecycleTask {
     INSTANCE;
 
     private PatternMatcher matcher = SimplePatternMatcher.INSTANCE;
-    private PatternConfigParser configParser = new SimplePatternConfigParser();
+    private PatternConfigParser configParser = SimplePatternConfigParser.INSTANCE;
     private BukkitConfigWrapper patternsConfig;
 
     public void register(MultiBlockPattern pattern) {
@@ -143,10 +144,6 @@ public enum PatternRegistry implements LifecycleTask {
 
             PatternRegistry.INSTANCE.register(pattern);
         }
-    }
-
-    public void reloadPatterns() {
-
     }
 
     public PatternMatcher matcher() {

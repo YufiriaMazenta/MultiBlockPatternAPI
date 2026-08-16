@@ -79,7 +79,7 @@ public class SimpleMatchResult implements MatchResult {
         CrypticLib.debug("[MBP] Executing " + pattern.getActions().size() + " actions for pattern: " + pattern.getId());
         for (var action : pattern.getActions()) {
             CrypticLib.debug("[MBP] Executing action: " + action.getClass().getSimpleName());
-            action.onMatch(this);
+            action.perform(this);
         }
         CrypticLib.debug("[MBP] Actions executed.");
     }

@@ -39,7 +39,7 @@ public class PatternBuilder {
     private String displayName;
     private final List<List<String>> layers = new ArrayList<>();
     private final Map<Character, BlockMatcher> matcherMap = new HashMap<>();
-    private final List<PatternAction> actions = new ArrayList<>();
+    private final List<Action> actions = new ArrayList<>();
     private boolean rotationEnabled = false;
     private MultiBlockPattern.Direction direction = MultiBlockPattern.Direction.HORIZONTAL;
 
@@ -106,7 +106,7 @@ public class PatternBuilder {
      * @param action 动作
      * @return this
      */
-    public PatternBuilder action(PatternAction action) {
+    public PatternBuilder action(Action action) {
         actions.add(action);
         return this;
     }
