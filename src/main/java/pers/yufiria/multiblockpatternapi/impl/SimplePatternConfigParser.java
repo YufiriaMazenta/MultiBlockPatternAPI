@@ -96,7 +96,7 @@ public enum SimplePatternConfigParser implements PatternConfigParser {
                 if (blocksConfig != null) {
                     String materialName = blocksConfig.getString(triggerStr);
                     if (materialName != null) {
-                        Material triggerMaterial = Material.matchMaterial(materialName);
+                        Material triggerMaterial = MaterialHelper.matchMaterial(materialName);
                         if (triggerMaterial != null) {
                             builder.triggerBlock(triggerChar, BlockMatcher.ofMaterial(triggerMaterial));
                         }

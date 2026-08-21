@@ -67,4 +67,13 @@ public interface MatchResult {
      * 执行该模式注册的所有 action
      */
     void execute();
+
+    /**
+     * 创建带有触发者信息的匹配结果副本
+     *
+     * @param causer 触发者
+     * @param triggerBlock 触发方块
+     * @return 带有触发信息的新 MatchResult
+     */
+    MatchResult withTrigger(@Nullable Invoker causer, @Nullable Block triggerBlock);
 }

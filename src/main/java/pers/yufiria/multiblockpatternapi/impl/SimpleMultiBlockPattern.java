@@ -120,7 +120,10 @@ public class SimpleMultiBlockPattern implements MultiBlockPattern {
 
     @Override
     public boolean containsMatcher(BlockMatcher matcher) {
-        return charMatcherMap.containsValue(matcher);
+        for (BlockMatcher m : charMatcherMap.values()) {
+            if (m == matcher) return true;
+        }
+        return false;
     }
 
     @Override

@@ -19,7 +19,6 @@ import pers.yufiria.multiblockpatternapi.config.Languages;
 import pers.yufiria.multiblockpatternapi.impl.SimplePatternConfigParser;
 import pers.yufiria.multiblockpatternapi.impl.SimplePatternMatcher;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,17 +52,15 @@ public enum PatternRegistry implements LifecycleTask {
     }
 
     public void clear() {
-        for (String id : new ArrayList<>(matcher.getAllPatterns().keySet())) {
-            matcher.unregisterPattern(id);
-        }
+        matcher.clearPatterns();
     }
 
     /**
      * 获取触发方块匹配指定方块的所有模式
      */
     public List<MultiBlockPattern> getPatternsByTrigger(Block block) {
-        return matcher.getAllPatterns().values().stream()
-            .filter(p -> p.hasTrigger() && p.getTriggerMatcher().matches(block))
+        return matcher.getTriggerPatterns().stream()
+            .filter(p -> p.getTriggerMatcher().matches(block))
             .collect(Collectors.toList());
     }
 
@@ -71,18 +68,14 @@ public enum PatternRegistry implements LifecycleTask {
      * 获取所有没有触发方块的模式
      */
     public List<MultiBlockPattern> getPatternsWithoutTrigger() {
-        return matcher.getAllPatterns().values().stream()
-            .filter(p -> !p.hasTrigger())
-            .collect(Collectors.toList());
+        return matcher.getNoTriggerPatterns();
     }
 
     /**
      * 获取所有交互触发的模式
      */
     public List<MultiBlockPattern> getPatternsByInteraction() {
-        return matcher.getAllPatterns().values().stream()
-            .filter(p -> p.getTriggerType() == TriggerType.INTERACTION && p.hasTrigger())
-            .collect(Collectors.toList());
+        return matcher.getInteractionPatterns();
     }
 
     public void loadPatterns() {

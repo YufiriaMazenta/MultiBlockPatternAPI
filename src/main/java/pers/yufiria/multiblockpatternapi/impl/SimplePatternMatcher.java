@@ -18,6 +18,9 @@ public enum SimplePatternMatcher implements PatternMatcher {
     INSTANCE;
 
     private final Map<String, MultiBlockPattern> patterns = new ConcurrentHashMap<>();
+    private volatile List<MultiBlockPattern> triggerPatterns = List.of();
+    private volatile List<MultiBlockPattern> noTriggerPatterns = List.of();
+    private volatile List<MultiBlockPattern> interactionPatterns = List.of();
     private RotationSupport rotationSupport = SimpleRotationSupport.getInstance();
 
     @Override
@@ -40,8 +43,10 @@ public enum SimplePatternMatcher implements PatternMatcher {
         int baseY = origin.getBlockY();
         int baseZ = origin.getBlockZ();
 
-        CrypticLib.debug("[MBP] Matching pattern: " + pattern.getId() + " at origin: " + baseX + "," + baseY + "," + baseZ + " rotation: " + rotation);
-        CrypticLib.debug("[MBP] offsetCharMap size: " + offsetCharMap.size());
+        if (CrypticLib.debug) {
+            CrypticLib.debug("[MBP] Matching pattern: " + pattern.getId() + " at origin: " + baseX + "," + baseY + "," + baseZ + " rotation: " + rotation);
+            CrypticLib.debug("[MBP] offsetCharMap size: " + offsetCharMap.size());
+        }
 
         for (Map.Entry<BlockVector, Character> entry : offsetCharMap.entrySet()) {
             BlockVector offset = entry.getKey();
@@ -54,7 +59,9 @@ public enum SimplePatternMatcher implements PatternMatcher {
             int blockZ = baseZ + transformed.z();
 
             if (blockY < 0 || blockY > world.getMaxHeight()) {
-                CrypticLib.debug("[MBP] Block Y out of bounds: " + blockY);
+                if (CrypticLib.debug) {
+                    CrypticLib.debug("[MBP] Block Y out of bounds: " + blockY);
+                }
                 return new SimpleMatchResult(false, pattern, origin, rotation, List.of(), null, null);
             }
 
@@ -62,21 +69,27 @@ public enum SimplePatternMatcher implements PatternMatcher {
 
             BlockMatcher matcher = charMatcherMap.get(expectedChar);
 
-            CrypticLib.debug("[MBP] Checking offset " + offset + " char '" + expectedChar + "' at " + blockX + "," + blockY + "," + blockZ + " block: " + block.getType() + " matcher: " + (matcher != null ? matcher.toString() : "wildcard"));
+            if (CrypticLib.debug) {
+                CrypticLib.debug("[MBP] Checking offset " + offset + " char '" + expectedChar + "' at " + blockX + "," + blockY + "," + blockZ + " block: " + block.getType() + " matcher: " + (matcher != null ? matcher.toString() : "wildcard"));
+            }
 
             if (matcher == null) {
                 continue;
             }
 
             if (!matcher.matches(block)) {
-                CrypticLib.debug("[MBP] Block mismatch!");
+                if (CrypticLib.debug) {
+                    CrypticLib.debug("[MBP] Block mismatch!");
+                }
                 return new SimpleMatchResult(false, pattern, origin, rotation, List.of(), null, null);
             }
 
             matchedBlocks.add(block);
         }
 
-        CrypticLib.debug("[MBP] Pattern matched successfully!");
+        if (CrypticLib.debug) {
+            CrypticLib.debug("[MBP] Pattern matched successfully!");
+        }
         return new SimpleMatchResult(true, pattern, origin, rotation, matchedBlocks, null, null);
     }
 
@@ -89,16 +102,39 @@ public enum SimplePatternMatcher implements PatternMatcher {
     public List<MatchResult> matchAll(MultiBlockPattern pattern, World world, BoundingBox area, RotationSupport.Rotation rotation, RotationSupport.Mirror mirror) {
         List<MatchResult> results = new ArrayList<>();
 
-        int minX = (int) area.getMinX();
-        int minY = (int) area.getMinY();
-        int minZ = (int) area.getMinZ();
-        int maxX = (int) area.getMaxX();
-        int maxY = (int) area.getMaxY();
-        int maxZ = (int) area.getMaxZ();
+        int areaMinX = (int) area.getMinX();
+        int areaMinY = (int) area.getMinY();
+        int areaMinZ = (int) area.getMinZ();
+        int areaMaxX = (int) area.getMaxX();
+        int areaMaxY = (int) area.getMaxY();
+        int areaMaxZ = (int) area.getMaxZ();
 
-        for (int x = minX; x <= maxX; x++) {
-            for (int y = minY; y <= maxY; y++) {
-                for (int z = minZ; z <= maxZ; z++) {
+        // 计算模式在变换后的空间包围盒，缩小搜索范围
+        Map<BlockVector, Character> offsetCharMap = pattern.getOffsetCharMap();
+        int minOffX = Integer.MAX_VALUE, maxOffX = Integer.MIN_VALUE;
+        int minOffY = Integer.MAX_VALUE, maxOffY = Integer.MIN_VALUE;
+        int minOffZ = Integer.MAX_VALUE, maxOffZ = Integer.MIN_VALUE;
+        for (BlockVector offset : offsetCharMap.keySet()) {
+            BlockVector transformed = rotationSupport.applyTransform(offset, rotation, mirror);
+            minOffX = Math.min(minOffX, transformed.x());
+            maxOffX = Math.max(maxOffX, transformed.x());
+            minOffY = Math.min(minOffY, transformed.y());
+            maxOffY = Math.max(maxOffY, transformed.y());
+            minOffZ = Math.min(minOffZ, transformed.z());
+            maxOffZ = Math.max(maxOffZ, transformed.z());
+        }
+
+        // 原点范围：确保模式至少有一个方块落在搜索区域内
+        int startX = Math.max(areaMinX, areaMinX - maxOffX);
+        int startY = Math.max(areaMinY, areaMinY - maxOffY);
+        int startZ = Math.max(areaMinZ, areaMinZ - maxOffZ);
+        int endX = Math.min(areaMaxX, areaMaxX - minOffX);
+        int endY = Math.min(areaMaxY, areaMaxY - minOffY);
+        int endZ = Math.min(areaMaxZ, areaMaxZ - minOffZ);
+
+        for (int x = startX; x <= endX; x++) {
+            for (int y = startY; y <= endY; y++) {
+                for (int z = startZ; z <= endZ; z++) {
                     Location origin = new Location(world, x, y, z);
                     MatchResult result = match(pattern, origin, rotation, mirror);
                     if (result.isMatch()) {
@@ -114,11 +150,13 @@ public enum SimplePatternMatcher implements PatternMatcher {
     @Override
     public void registerPattern(MultiBlockPattern pattern) {
         patterns.put(pattern.getId(), pattern);
+        rebuildCategorizedLists();
     }
 
     @Override
     public void unregisterPattern(String patternId) {
         patterns.remove(patternId);
+        rebuildCategorizedLists();
     }
 
     @Override
@@ -129,6 +167,47 @@ public enum SimplePatternMatcher implements PatternMatcher {
     @Override
     public Map<String, MultiBlockPattern> getAllPatterns() {
         return Map.copyOf(patterns);
+    }
+
+    @Override
+    public void clearPatterns() {
+        patterns.clear();
+        rebuildCategorizedLists();
+    }
+
+    @Override
+    public List<MultiBlockPattern> getTriggerPatterns() {
+        return triggerPatterns;
+    }
+
+    @Override
+    public List<MultiBlockPattern> getNoTriggerPatterns() {
+        return noTriggerPatterns;
+    }
+
+    @Override
+    public List<MultiBlockPattern> getInteractionPatterns() {
+        return interactionPatterns;
+    }
+
+    private void rebuildCategorizedLists() {
+        List<MultiBlockPattern> all = List.copyOf(patterns.values());
+        List<MultiBlockPattern> triggers = new ArrayList<>();
+        List<MultiBlockPattern> noTriggers = new ArrayList<>();
+        List<MultiBlockPattern> interactions = new ArrayList<>();
+        for (MultiBlockPattern p : all) {
+            if (p.hasTrigger()) {
+                if (p.getTriggerType() == TriggerType.INTERACTION) {
+                    interactions.add(p);
+                }
+                triggers.add(p);
+            } else {
+                noTriggers.add(p);
+            }
+        }
+        this.triggerPatterns = List.copyOf(triggers);
+        this.noTriggerPatterns = List.copyOf(noTriggers);
+        this.interactionPatterns = List.copyOf(interactions);
     }
 
     public RotationSupport rotationSupport() {

@@ -84,4 +84,30 @@ public interface PatternMatcher {
      * @return 模式ID到模式的映射
      */
     Map<String, MultiBlockPattern> getAllPatterns();
+
+    /**
+     * 清除所有已注册的模式
+     */
+    void clearPatterns();
+
+    /**
+     * 获取所有 BLOCK_CHANGE 触发类型且有触发方块的模式
+     *
+     * @return 预分类的不可变列表
+     */
+    List<MultiBlockPattern> getTriggerPatterns();
+
+    /**
+     * 获取所有没有触发方块的模式
+     *
+     * @return 预分类的不可变列表
+     */
+    List<MultiBlockPattern> getNoTriggerPatterns();
+
+    /**
+     * 获取所有 INTERACTION 触发类型且有触发方块的模式
+     *
+     * @return 预分类的不可变列表
+     */
+    List<MultiBlockPattern> getInteractionPatterns();
 }

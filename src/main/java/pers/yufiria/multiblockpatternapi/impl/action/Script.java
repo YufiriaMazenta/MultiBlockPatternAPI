@@ -31,6 +31,7 @@ public enum Script implements ActionType {
             CompiledScript compiledScript = ScriptEngine.INSTANCE.compile("action_script_" + System.nanoTime(), String.join("\n", scriptLines));
             return result -> {
                 if (result.getCauser() == null) {
+                    CrypticLib.info("&e[MBP] Script action skipped: no causer (triggered by non-player event)");
                     return;
                 }
                 ScriptContext context = new ScriptContext(result.getCauser());
